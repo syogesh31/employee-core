@@ -31,21 +31,21 @@ This project is a Proof of Concept (POC) for a Spring Boot application that uses
     mvn spring-boot:run
     ```
 3.  Open Swagger UI: `http://localhost:8080/swagger-ui.html`
-4.  Click **Authorize**:
-    - Enter your `client-id`.
-    - Enter `client-secret`.
-    - Select `openid`, `profile`, and `email` scopes.
-5.  Follow the Google login prompt.
-6.  Once authorized, use the **Try it out** button on the `/whoami` endpoint.
 
-## Important Note on Google Tokens
-Google's **Access Token** (returned by default in the OAuth2 flow) is **opaque** and cannot be decoded as a JWT by the backend.
-However, Google also returns an **ID Token** which is a valid JWT.
+## Testing the /whoami Endpoint (Handling "Malformed token")
 
-This POC is configured as a **JWT Resource Server**. If you call `/whoami` from Swagger and get a `401 Unauthorized` or a decoding error, it is because Swagger is sending the opaque `access_token`.
+Google returns an **Access Token** (opaque string) and an **ID Token** (JWT). Swagger UI sends the Access Token by default, which causes an "invalid_token: Malformed token" error in this POC because the backend expects a JWT.
 
-To see the JWT claims in this POC, you can:
-1.  Manually copy the `id_token` from the browser's Network tab (after logging in via Swagger).
-2.  Use the `id_token` in the "Authorize" header manually.
+### Steps to test successfully in Swagger:
 
-*In a production application, you would typically use `spring-boot-starter-oauth2-client` for web applications or configure the resource server to validate opaque tokens via Google's userinfo endpoint.*
+1.  Click **Authorize** in Swagger UI.
+2.  Log in via the `google_oauth` section.
+3.  Once authorized, **open your browser's Developer Tools (F12)**.
+4.  Go to the **Network** tab and find the request to `token` (on the `oauth2.googleapis.com` domain).
+5.  In the **Response** body of that request, copy the long `id_token` string.
+6.  Go back to the Swagger **Authorize** dialog.
+7.  Scroll down to the **manual_jwt** section.
+8.  Paste the `id_token` you copied into the "Value" box and click **Authorize**.
+9.  Now, call the `/whoami` endpoint. It will succeed and return the JSON claims from your Google JWT!
+
+*Note: In a production web app, the frontend would handle extracting the ID Token and sending it to the backend.*
