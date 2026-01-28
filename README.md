@@ -32,20 +32,20 @@ This project is a Proof of Concept (POC) for a Spring Boot application that uses
     ```
 3.  Open Swagger UI: `http://localhost:8080/swagger-ui.html`
 
-## Testing the /whoami Endpoint (Handling "Malformed token")
+## Testing the /whoami Endpoint
 
-Google returns an **Access Token** (opaque string) and an **ID Token** (JWT). Swagger UI sends the Access Token by default, which causes an "invalid_token: Malformed token" error in this POC because the backend expects a JWT.
+This POC is configured to use **OpenID Connect (OIDC)** in Swagger. This ensures that Swagger uses the Google **ID Token** (which is a JWT) instead of the opaque Access Token.
 
-### Steps to test successfully in Swagger:
+### Steps to test:
 
-1.  Click **Authorize** in Swagger UI.
-2.  Log in via the `google_oauth` section.
-3.  Once authorized, **open your browser's Developer Tools (F12)**.
-4.  Go to the **Network** tab and find the request to `token` (on the `oauth2.googleapis.com` domain).
-5.  In the **Response** body of that request, copy the long `id_token` string.
-6.  Go back to the Swagger **Authorize** dialog.
-7.  Scroll down to the **manual_jwt** section.
-8.  Paste the `id_token` you copied into the "Value" box and click **Authorize**.
-9.  Now, call the `/whoami` endpoint. It will succeed and return the JSON claims from your Google JWT!
+1.  Click the **Authorize** button in Swagger UI.
+2.  Select the `openid`, `profile`, and `email` scopes.
+3.  Click **Authorize** and complete the Google login.
+4.  Swagger will automatically receive the `id_token`.
+5.  Now, call the `/whoami` GET endpoint using **Try it out**.
+6.  It should return your user claims (name, email, etc.) as JSON!
 
-*Note: In a production web app, the frontend would handle extracting the ID Token and sending it to the backend.*
+### Troubleshooting "Malformed token"
+If you still receive a "Malformed token" error, it means Swagger sent the opaque `access_token` instead of the `id_token`. This sometimes happens if the browser caches old OAuth sessions.
+- Try clearing your browser cache or using an Incognito window.
+- Ensure `use-id-token-with-authorization-code-grant: true` is set in your `application.yml`.

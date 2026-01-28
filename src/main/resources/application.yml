@@ -12,7 +12,8 @@ springdoc:
       client-id: ${GOOGLE_CLIENT_ID:your-google-client-id}
       client-secret: ${GOOGLE_CLIENT_SECRET:your-google-client-secret}
       scopes: openid, profile, email
+      use-id-token-with-authorization-code-grant: true
   openapi:
     security:
-      - google_oauth: []
+      - google_oidc: []
       - manual_jwt: []
